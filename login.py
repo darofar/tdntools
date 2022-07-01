@@ -15,8 +15,10 @@ def login(login_url, user_name, password):
         'j_username': user_name,
         'j_password': password
     }
-    r = requests.post(login_url, data=payload, headers=headers)
-    if not 'JSESSIONID' in r.request._cookies or not r.request._cookies.get('JSESSIONID'):
+    session = requests.Session()
+    r = session.post(login_url, data=payload, headers=headers)
+    print(f"login cookies: {session.cookies.get_dict()}")
+    if 'JSESSIONID' not in session.cookies.get_dict() or not session.cookies.get_dict().get('JSESSIONID'):
         message = f"response status: {r.status_code}\nresponse text: {r.text}"
         raise LoginError(f"Cannot login into the application\n{message}")
-    return r.request._cookies.get('JSESSIONID')
+    return session.cookies.get_dict().get('JSESSIONID')
