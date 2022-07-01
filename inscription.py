@@ -15,8 +15,8 @@ JSESSIONID = os.getenv("JSESSION_ID")
 INSCRIBE_URL = os.getenv("INSCRIBE_URL", "http://jornadas-tdn.org/virtual/ocupar")
 LOGIN_URL = os.getenv("LOGIN_URL", "http://jornadas-tdn.org/j_spring_security_check")
 ENVIRONMENT = os.getenv('ENVIRONMENT', "pro")
-TIMEOUT = os.getenv('TIMEOUT', 4)
-WAIT = os.getenv('WAIT', 0.25)
+TIMEOUT = os.getenv('TIMEOUT', 5)
+WAIT = os.getenv('WAIT', 0.1)
 MAX_THREADS = os.getenv('MAX_THREADS', 8)
 
 # Class of different styles
@@ -73,7 +73,6 @@ def inscribe(jsessionid, count):
         print("\n\n")
     except requests.Timeout as t:
         print(f"{color}Timeout: {t}{COLOR_END}")
-
     return False
 
 
@@ -126,6 +125,7 @@ def main(argv):
         thread = threading.Thread(target=inscribe, args=(jsessionid, count,))
         thread.start()
         count += 1
+        # print(f"Active threads: {threading.active_count()} (waiting)")
         time.sleep(WAIT)
 
         if ENVIRONMENT == 'DEV' and count > 10:
