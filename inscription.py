@@ -2,6 +2,7 @@ import getopt
 import os
 import sys
 import time
+import random
 import threading
 
 import requests
@@ -13,6 +14,10 @@ PASSWORD = os.getenv("PASSWORD")
 JSESSIONID = os.getenv("JSESSION_ID")
 INSCRIBE_URL = os.getenv("INSCRIBE_URL", "http://jornadas-tdn.org/virtual/ocupar")
 LOGIN_URL = os.getenv("LOGIN_URL", "http://jornadas-tdn.org/j_spring_security_check")
+ENVIRONMENT = os.getenv('ENVIRONMENT', "pro")
+TIMEOUT = os.getenv('TIMEOUT', 4)
+WAIT = os.getenv('WAIT', 0.25)
+MAX_THREADS = os.getenv('MAX_THREADS', 8)
 
 # Class of different styles
 COLORS = {
@@ -40,11 +45,15 @@ def get_color(count):
 
 
 def inscribe(jsessionid, count):
+
+    if ENVIRONMENT == 'DEV':
+        time.sleep(random.randint(0, 9))
+
     color = get_color(count)
     print(f"{color}making requests {count}... {INSCRIBE_URL}{COLOR_END}")
     print(f"{color}JSESSIONID: {jsessionid}{COLOR_END}")
-    r = requests.get(INSCRIBE_URL, cookies={'JSESSIONID': jsessionid}, timeout=2)
-    print(r.text)
+    r = requests.get(INSCRIBE_URL, cookies={'JSESSIONID': jsessionid}, timeout=TIMEOUT)
+    # print(f"{color}{r.text}{COLOR_END}")
     if "error" in r.text.lower():
         print(f"{color}error... {COLOR_END}")
         return False
@@ -103,10 +112,19 @@ def main(argv):
         sys.exit(2)
     count = 1
     while True:
+
+        # if threading.active_count() == 8:
+        #     print(f"Active threads: {threading.active_count()} (waiting)")
+        #     time.sleep(WAIT)
+        #     continue
+
         thread = threading.Thread(target=inscribe, args=(jsessionid, count,))
         thread.start()
         count += 1
-        time.sleep(0.5)
+        time.sleep(WAIT)
+
+        if ENVIRONMENT == 'DEV' and count > 10:
+            break
 
 
 if __name__ == "__main__":
