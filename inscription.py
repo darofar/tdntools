@@ -52,23 +52,28 @@ def inscribe(jsessionid, count):
     color = get_color(count)
     print(f"{color}making requests {count}... {INSCRIBE_URL}{COLOR_END}")
     print(f"{color}JSESSIONID: {jsessionid}{COLOR_END}")
-    r = requests.get(INSCRIBE_URL, cookies={'JSESSIONID': jsessionid}, timeout=TIMEOUT)
-    # print(f"{color}{r.text}{COLOR_END}")
-    if "error" in r.text.lower():
-        print(f"{color}error... {COLOR_END}")
-        return False
-    if "lo sentimos" in r.text.lower():
-        print(f"{color}still closed...{COLOR_END}")
-        return False
-    if "<title>login</title>" in r.text.lower():
-        print(f"{color}JSESSIONID FAIL... change it!!!{COLOR_END}")
-        return False
-    if "enhorabuena" in r.text.lower():
-        print(f"{color}¡¡¡DENTRO!!!{COLOR_END}")
-        return True
-    print(f"{color}WTF!!!{COLOR_END}")
-    print(f"{color}{r.text}{COLOR_END}")
-    print("\n\n")
+
+    try:
+        r = requests.get(INSCRIBE_URL, cookies={'JSESSIONID': jsessionid}, timeout=TIMEOUT)
+        # print(f"{color}{r.text}{COLOR_END}")
+        if "error" in r.text.lower():
+            print(f"{color}error... {COLOR_END}")
+            return False
+        if "lo sentimos" in r.text.lower():
+            print(f"{color}still closed...{COLOR_END}")
+            return False
+        if "<title>login</title>" in r.text.lower():
+            print(f"{color}JSESSIONID FAIL... change it!!!{COLOR_END}")
+            return False
+        if "enhorabuena" in r.text.lower():
+            print(f"{color}¡¡¡DENTRO!!!{COLOR_END}")
+            return True
+        print(f"{color}WTF!!!{COLOR_END}")
+        print(f"{color}{r.text}{COLOR_END}")
+        print("\n\n")
+    except requests.Timeout as t:
+        print(f"{color}Timeout: {t}{COLOR_END}")
+
     return False
 
 
